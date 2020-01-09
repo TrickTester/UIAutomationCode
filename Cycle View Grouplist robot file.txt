@@ -1,0 +1,20 @@
+*** Settings ***
+Library      MQTTLibrary
+Library     OperatingSystem
+Resource    ../CommonKeywords.robot
+
+*** Variables ***
+${topic}=    lb/cycles/view_groups/list
+
+*** Test Cases ***
+MQTT test
+    [Tags]  mqtt
+    [Setup]     Connect to client
+    ${expectedValue}=   get file  lb_cycles_hider/cycles_view_grouplist.txt
+    Subscribe to a topic    topicName=${topic}/response    qos=1    timeout=1    limit=1
+    Publish An MQTT Request    topicName=${topic}/request
+    ${messages}=      Subscribe to a topic   topicName=${topic}/response   qos=1    timeout=1    limit=1
+    #Log To Console  Messages=${messages}
+    #${actualValue}=    Evaluate     json.loads("""${messages[0]}""")    json
+    Should Be Equal    ${messages[0]}    ${expectedValue}
+    [Teardown]  Disconnect
